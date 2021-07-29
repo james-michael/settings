@@ -20,8 +20,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
 
     const settingsModified = payload.commits.find(commit => {
-      return commit.added.includes(Settings.FILE_NAME) ||
-        commit.modified.includes(Settings.FILE_NAME)
+      // Spoiler: https://github.blog/changelog/2019-10-16-changes-in-github-actions-push-event-payload/
+      if ('added' in commit || 'modified' in commit) {
+        return commit.added.includes(Settings.FILE_NAME) || commit.modified.includes(Settings.FILE_NAME)
+      } else {
+        // Since workflows can be triggered based on file change, assume settings have changed
+        return true
+      }
     })
 
     if (!settingsModified) {
